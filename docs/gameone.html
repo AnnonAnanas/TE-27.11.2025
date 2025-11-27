@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>English Learning Catch Game</title>
+<style>
+  body {
+    margin: 0;
+    background: #f0f8ff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 { margin-top: 20px; }
+  #gameCanvas {
+    background: #dff6ff;
+    border: 3px solid #333;
+    display: block;
+  }
+  #panel {
+    margin-top: 10px;
+    display: flex;
+    gap: 20px;
+    font-size: 18px;
+  }
+  #wordBox {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: 2px solid #333;
+    background: #fff;
+    font-size: 20px;
+  }
+  #choices {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .choiceBtn {
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid #333;
+    background: #fff;
+  }
+  .choiceBtn:hover {
+    background: #c9f0ff;
+  }
+</style>
+</head>
+<body>
+<h1>English Learning Catch Game</h1>
+<canvas id="gameCanvas" width="500" height="600"></canvas>
+
+<div id="panel">
+  <div>Score: <span id="score">0</span></div>
+  <div>Lives: <span id="lives">3</span></div>
+</div>
+
+<div id="wordBox">Catch the item that matches: <b id="targetMeaning">---</b></div>
+<div id="choices"></div>
+
+<script>
+// Canvas setup
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
+const targetMeaningEl = document.getElementById("targetMeaning");
+const choicesDiv = document.getElementById("choices");
+
+let score = 0;
+let lives = 3;
+let basket = { x: 220, y: 550, width: 60, height: 30 };
+let fallingItems = [];
+let speed = 2;
+let currentTarget = null;
+
+// Vocabulary list
+const vocab = [
+  { word: "apple", meaning: "a fruit" },
+  { word: "dog", meaning: "an animal" },
+  { word: "car", meaning: "a vehicle" },
+  { word: "chair", meaning: "furniture" },
+  { word: "book", meaning: "something you read" },
+];
+
+function newRound() {
+  // pick target meaning
+  currentTarget = vocab[Math.floor(Math.random() * vocab.length)];
+  targetMeaningEl.textContent = currentTarget.meaning;
+
+  // show 3 choice buttons
+  const shuffled = [...vocab].sort(() => Math.random() - 0.5).slice(0, 3);
+  if (!shuffled.includes(currentTarget)) shuffled[0] = currentTarget;
+
+  choicesDiv.innerHTML = "";
+  shuffled.sort(() => Math.random() - 0.5).forEach((entry) => {
+    const btn = document.createElement("button");
+    btn.className = "choiceBtn";
+    btn.textContent = entry.word;
+    btn.onclick = () => spawnItem(entry.word);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function spawnItem(word) {
+  fallingItems.push({ word, x: Math.random() * 450, y: -20 });
+}
+
+function update() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw basket
+  ctx.fillStyle = "#333";
+  ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+
+  // Update falling items
+  ctx.font = "20px Arial";
+  fallingItems.forEach((item, index) => {
+    item.y += speed;
+
+    // Draw word
+    ctx.fillStyle = "#000";
+    ctx.fillText(item.word, item.x, item.y);
+
+    // Check collision
+    if (
+      item.y + 20 > basket.y &&
+      item.x > basket.x - 20 &&
+      item.x < basket.x + basket.width + 20
+    ) {
+      if (item.word === currentTarget.word) {
+        score += 10;
+        scoreEl.textContent = score;
+        speed += 0.2;
+        newRound();
+      } else {
+        lives--;
+        livesEl.textContent = lives;
+        if (lives <= 0) alert("Game Over! Your score: " + score);
+      }
+      fallingItems.splice(index, 1);
+    }
+
+    // Missed
+    if (item.y > 620) {
+      lives--;
+      livesEl.textContent = lives;
+      if (lives <= 0) alert("Game Over! Your score: " + score);
+      fallingItems.splice(index, 1);
+    }
+  });
+
+  requestAnimationFrame(update);
+}
+
+// Basket movement
+window.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  basket.x = e.clientX - rect.left - basket.width / 2;
+});
+
+newRound();
+update();
+</script>
+</body>
+</html>
 
