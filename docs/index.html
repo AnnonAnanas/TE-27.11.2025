@@ -1,1 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fruit Catcher — HTML Game</title>
+  <style>
+    :root{
+      --bg:#0f1724; --panel:#0b1220; --accent:#ff7a18; --muted:#94a3b8; --glass:rgba(255,255,255,0.06);
+      --width:420px; --height:680px;
+      --safe-area: env(safe-area-inset-bottom, 0px);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{background:linear-gradient(180deg,#071020 0%, #0b1220 100%);display:flex;align-items:center;justify-content:center;height:100vh;margin:0;color:#e6eef8}
+    main#app{width:min(var(--width),calc(100vw - 24px));height:min(var(--height),calc(100vh - 24px));background:linear-gradient(180deg,var(--panel), #071026);border-radius:18px;padding:14px;box-shadow:0 12px 30px rgba(2,6,23,.6);display:flex;flex-direction:column;overflow:hidden}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    h1{font-size:18px;margin:0}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:var(--glass);border:none;color:inherit;padding:8px 12px;border-radius:10px;font-weight:600;backdrop-filter:blur(6px);cursor:pointer}
+    button:active{transform:translateY(1px)}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:8px;align-items:center}
+    .score{min-width:86px}
+    .arena{flex:1;background:linear-gradient(180deg,#082033,#061222);margin-top:10px;border-radius:12px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex;align-items:flex-end;justify-content:center}
+    /* Player basket */
+    .basket{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:110px;height:36px;border-radius:18px;background:linear-gradient(90deg,#ffd89b,#ff7a18);display:flex;align-items:center;justify-content:center;color:#2b0d00;font-weight:800;letter-spacing:0.6px;box-shadow:0 6px 14px rgba(255,122,24,0.14)}
+    .basket::after{content:'';position:absolute;top:-8px;left:10px;width:40px;height:10px;background:rgba(255,255,255,0.08);border-radius:4px}
+    /* falling item */
+    .item{position:absolute;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .apple{background:radial-gradient(circle at 30% 30%,#ff7b7b,#e21b2b);box-shadow:inset -4px -4px 8px rgba(0,0,0,0.15)}
+    .banana{background:linear-gradient(90deg,#fff18b,#ffd22b);border-radius:18px}
+    .orange{background:radial-gradient(circle at 30% 30%,#ffd8a8,#ff8a00)}
+    /* UI overlay */
+    .hud{position:absolute;top:12px;left:12px;display:flex;gap:8px;align-items:center}
+    .lives{display:flex;gap:6px}
+    .life{width:14px;height:14px;border-radius:50%;background:#ff6b6b;opacity:0.9}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* footer */
+    footer{margin-top:10px;display:flex;justify-content:space-between;align-items:center}
+    .controls-keys{display:flex;gap:8px;align-items:center}
+    .key{padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:8px;font-weight:700}
+
+    /* responsive */
+    @media (max-width:420px){:root{--width:100vw;--height:calc(100vh - 24px)} main#app{border-radius:12px;padding:10px}}  
+  </style>
+</head>
+<body>
+  <main id="app" role="application" aria-label="Fruit Catcher game">
+    <header>
+      <h1>Fruit Catcher</h1>
+      <div class="controls">
+        <div class="panel score" aria-live="polite">Score: <span id="score">0</span></div>
+        <button id="startBtn">Start</button>
+        <button id="pauseBtn" disabled>Pause</button>
+      </div>
+    </header>
+
+    <div class="arena" id="arena">
+      <div class="hud" aria-hidden="false">
+        <div class="lives" id="lives"></div>
+        <div class="muted" style="margin-left:10px">Highscore: <span id="highscore">0</span></div>
+      </div>
+
+      <div class="basket" id="basket" role="img" aria-label="Player basket">CATCH</div>
+
+      <!-- Items are inserted here by JavaScript -->
+    </div>
+
+    <footer>
+      <div class="controls-keys muted">Move: <span class="key">◀</span> <span class="key">▶</span> or touch & drag</div>
+      <div class="muted">Lives: <span id="livesCount">3</span></div>
+    </footer>
+  </main>
+
+  <script>
+    // Fruit Catcher — Single file HTML game
+    (function(){
+      const arena = document.getElementById('arena');
+      const basket = document.getElementById('basket');
+      const startBtn = document.getElementById('startBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const scoreEl = document.getElementById('score');
+      const highscoreEl = document.getElementById('highscore');
+      const livesEl = document.getElementById('lives');
+      const livesCountEl = document.getElementById('livesCount');
+
+      const ARENA_W = () => arena.clientWidth;
+      const ARENA_H = () => arena.clientHeight;
+
+      let state = {
+        running:false,
+        paused:false,
+        score:0,
+        highscore: Number(localStorage.getItem('fc_highscore') || 0),
+        lives:3,
+        items:[],
+        lastSpawn:0,
+        spawnInterval:900,
+        speedMultiplier:1,
+        lastTime:0
+      };
+
+      highscoreEl.textContent = state.highscore;
+      livesCountEl.textContent = state.lives;
+
+      // utility: random
+      function rand(min,max){return Math.random()*(max-min)+min}
+
+      function createItem(){
+        const div = document.createElement('div');
+        const types = ['apple','banana','orange'];
+        const type = types[Math.floor(Math.random()*types.length)];
+        div.className = `item ${type}`;
+        div.dataset.type = type;
+        // random size variation
+        const size = Math.round(rand(28,44));
+        div.style.width = size + 'px';
+        div.style.height = size + 'px';
+        // start position
+        const x = rand(12, ARENA_W() - 12 - size);
+        div.style.left = x + 'px';
+        div.style.top = -size + 'px';
+        // taste label (for fun)
+        div.title = type;
+        arena.appendChild(div);
+        state.items.push({el:div,x, y:-size, vy: rand(40,90) });
+      }
+
+      function update(dt){
+        // spawn logic
+        state.lastSpawn += dt;
+        if(state.lastSpawn > state.spawnInterval){
+          state.lastSpawn = 0;
+          createItem();
+          // gradually increase difficulty
+          if(state.spawnInterval > 400) state.spawnInterval -= 10;
+          state.speedMultiplier += 0.01;
+        }
+
+        // update items
+        for(let i = state.items.length-1; i>=0; i--){
+          const it = state.items[i];
+          it.y += it.vy * state.speedMultiplier * (dt/1000);
+          it.el.style.top = it.y + 'px';
+
+          // collision with basket?
+          const bRect = basket.getBoundingClientRect();
+          const aRect = arena.getBoundingClientRect();
+          const itRect = it.el.getBoundingClientRect();
+
+          // compute coordinates relative to arena
+          const itCx = itRect.left - aRect.left + itRect.width/2;
+          const itCy = itRect.top - aRect.top + itRect.height/2;
+          const basketCx = bRect.left - aRect.left + bRect.width/2;
+          const basketCy = bRect.top - aRect.top + bRect.height/2;
+
+          const dx = itCx - basketCx;
+          const dy = itCy - basketCy;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+
+          const catchRadius = Math.max(bRect.width, bRect.height)/2 + Math.max(itRect.width,itRect.height)/2 - 6;
+          if(dist < catchRadius){
+            // caught
+            arena.removeChild(it.el);
+            state.items.splice(i,1);
+            addScore(it.el.dataset.type);
+            continue;
+          }
+
+          // fell out of arena
+          if(it.y > ARENA_H() + 60){
+            arena.removeChild(it.el);
+            state.items.splice(i,1);
+            loseLife();
+          }
+        }
+      }
+
+      function addScore(type){
+        const worth = {apple:10, banana:15, orange:12}[type] || 10;
+        state.score += worth;
+        scoreEl.textContent = state.score;
+        if(state.score > state.highscore){
+          state.highscore = state.score;
+          highscoreEl.textContent = state.highscore;
+          localStorage.setItem('fc_highscore', state.highscore);
+        }
+      }
+
+      function loseLife(){
+        state.lives -=1;
+        livesCountEl.textContent = state.lives;
+        renderLives();
+        if(state.lives <=0){
+          gameOver();
+        }
+      }
+
+      function renderLives(){
+        livesEl.innerHTML = '';
+        for(let i=0;i<state.lives;i++){
+          const d = document.createElement('div'); d.className='life'; livesEl.appendChild(d);
+        }
+      }
+
+      function gameOver(){
+        state.running = false;
+        pauseBtn.disabled = true;
+        startBtn.textContent = 'Restart';
+        alert('Game Over! Your score: ' + state.score);
+        // clear items
+        state.items.forEach(it=>{ if(it.el && it.el.parentNode) it.el.parentNode.removeChild(it.el) });
+        state.items = [];
+      }
+
+      function startGame(){
+        state.running = true; state.paused=false; state.score=0; state.lives=3; state.spawnInterval=900; state.speedMultiplier=1; state.lastSpawn=0;
+        scoreEl.textContent = 0; livesCountEl.textContent = 3; renderLives(); startBtn.textContent='Restart'; pauseBtn.disabled=false; pauseBtn.textContent='Pause';
+        state.lastTime = performance.now();
+        requestAnimationFrame(loop);
+      }
+
+      function pauseGame(){
+        if(!state.running) return;
+        state.paused = !state.paused;
+        pauseBtn.textContent = state.paused ? 'Resume' : 'Pause';
+        if(!state.paused) { state.lastTime = performance.now(); requestAnimationFrame(loop); }
+      }
+
+      function loop(now){
+        if(!state.running || state.paused) return;
+        const dt = now - state.lastTime; state.lastTime = now;
+        update(dt);
+        requestAnimationFrame(loop);
+      }
+
+      // controls: keyboard
+      let pointerDown = false;
+      let touchId = null;
+      function moveBasketTo(x){
+        const rect = arena.getBoundingClientRect();
+        const half = basket.clientWidth/2;
+        const left = Math.min(Math.max(x - rect.left - half, 8), rect.width - half*2 - 8);
+        basket.style.left = (left + half) + 'px';
+      }
+
+      // keyboard control
+      window.addEventListener('keydown', e => {
+        if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){
+          // move left slightly
+          const cur = basket.getBoundingClientRect();
+          moveBasketTo(cur.left - 40 + basket.clientWidth/2);
+        }
+        if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){
+          const cur = basket.getBoundingClientRect();
+          moveBasketTo(cur.left + 40 + basket.clientWidth/2);
+        }
+        if(e.key === ' '){
+          e.preventDefault();
+          if(!state.running) startGame();
+        }
+      });
+
+      // mouse/touch drag
+      arena.addEventListener('pointerdown', e => { pointerDown=true; arena.setPointerCapture(e.pointerId); moveBasketTo(e.clientX); });
+      arena.addEventListener('pointermove', e => { if(pointerDown) moveBasketTo(e.clientX); });
+      arena.addEventListener('pointerup', e => { pointerDown=false; try{ arena.releasePointerCapture(e.pointerId);}catch(_){} });
+
+      // buttons
+      startBtn.addEventListener('click', ()=>{ startGame(); });
+      pauseBtn.addEventListener('click', ()=>{ pauseGame(); });
+
+      // handle resize — keep basket inside
+      window.addEventListener('resize', ()=>{ const b = basket.getBoundingClientRect(); const a = arena.getBoundingClientRect(); if(b.right > a.right) basket.style.left = (a.width - b.width/2 - 12) + 'px'; });
+
+      // initialize
+      highscoreEl.textContent = state.highscore;
+      renderLives();
+
+      // small accessibility: focus start on load
+      startBtn.focus();
+
+    })();
+  </script>
+</body>
+</html>
 
