@@ -1,170 +1,1309 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>English Learning Catch Game</title>
-<style>
-  body {
-    margin: 0;
-    background: #f0f8ff;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  h1 { margin-top: 20px; }
-  #gameCanvas {
-    background: #dff6ff;
-    border: 3px solid #333;
-    display: block;
-  }
-  #panel {
-    margin-top: 10px;
-    display: flex;
-    gap: 20px;
-    font-size: 18px;
-  }
-  #wordBox {
-    margin-top: 15px;
-    padding: 10px 20px;
-    border: 2px solid #333;
-    background: #fff;
-    font-size: 20px;
-  }
-  #choices {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-  }
-  .choiceBtn {
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    border: 2px solid #333;
-    background: #fff;
-  }
-  .choiceBtn:hover {
-    background: #c9f0ff;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Vokabeltrainer Unit 8 & 9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent: #16a34a;
+      --accent-soft: #dcfce7;
+      --danger: #dc2626;
+      --danger-soft: #fee2e2;
+      --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.08);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      color: var(--text-main);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 18px 16px;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 1.2rem + 0.8vw, 1.7rem);
+      font-weight: 650;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: #f9fafb;
+    }
+
+    .top-bar {
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.9rem;
+    }
+
+    .hearts span {
+      font-size: 1.2rem;
+      margin-right: 2px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .chip strong {
+      color: var(--text-main);
+    }
+
+    .progress-bar {
+      margin-top: 10px;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: var(--accent);
+      transition: width 0.25s ease-out;
+    }
+
+    .layout {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 780px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 14px 12px 12px;
+    }
+
+    .card-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.8rem;
+    }
+
+    .tag {
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .question-main {
+      font-size: clamp(1.3rem, 1.1rem + 0.6vw, 1.6rem);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .question-sub {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Mode panels */
+    .mode-panel {
+      display: none;
+    }
+
+    .mode-panel.active {
+      display: block;
+    }
+
+    /* Multiple choice */
+    .options {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.1s ease-out, border-color 0.1s, transform 0.1s;
+    }
+
+    .option span.label {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .option span.text {
+      flex: 1;
+    }
+
+    .option:hover {
+      background: #eef2ff;
+      transform: translateY(-1px);
+      border-color: #c7d2fe;
+    }
+
+    .option.correct {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .option.wrong {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .option.disabled {
+      pointer-events: none;
+      opacity: 0.95;
+    }
+
+    /* Flashcards */
+    .flashcard-box {
+      border-radius: var(--radius-lg);
+      border: 1px dashed #d1d5db;
+      padding: 12px 10px;
+      background: #f9fafb;
+      text-align: center;
+    }
+
+    .flash-main {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .flash-translation {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 0.95rem;
+    }
+
+    .flash-translation.hidden {
+      color: #d1d5db;
+    }
+
+    .flash-translation.hidden span.content {
+      filter: blur(3px);
+    }
+
+    .flash-buttons,
+    .sentence-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Sentence mode */
+    .sentence-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .sentence-word {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: 8px 9px;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: 2px solid #bfdbfe;
+      outline-offset: 1px;
+    }
+
+    /* Settings side */
+    .settings-block {
+      margin-bottom: 10px;
+    }
+
+    .settings-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .btn-chip {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #d1d5db;
+    }
+
+    .btn-chip.selected {
+      border-color: var(--accent);
+      background: #ecfdf3;
+      color: #166534;
+    }
+
+    .btn-chip.selected .dot {
+      background: var(--accent);
+    }
+
+    .btn-primary {
+      margin-top: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color: #ecfdf5;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .btn-secondary {
+      margin-top: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-box {
+      margin-top: 10px;
+      padding: 8px 9px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #f9fafb;
+    }
+
+    .status-box.good {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #166534;
+    }
+
+    .status-box.bad {
+      border-color: var(--danger);
+      background: var(--danger-soft);
+      color: #991b1b;
+    }
+
+    .summary {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .summary-list {
+      margin-top: 4px;
+      max-height: 140px;
+      overflow-y: auto;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 4px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 2px 0;
+      border-bottom: 1px dashed #e5e7eb;
+      font-size: 0.83rem;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+
+    .summary-item .miss-count {
+      white-space: nowrap;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      padding: 1px 7px;
+      font-size: 0.75rem;
+      color: #7f1d1d;
+      background: #fef2f2;
+    }
+
+    .footer {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-small {
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+    }
+  </style>
 </head>
 <body>
-<h1>English Learning Catch Game</h1>
-<canvas id="gameCanvas" width="500" height="600"></canvas>
+<div class="app">
+  <div class="app-header">
+    <div>
+      <h1>Vokabeltrainer – Technical English 2</h1>
+      <div class="subtitle">
+        Lerne alle Vokabeln aus Unit 8 &amp; 9. Wähle Unit, Modus und Richtung – mit leichtem Gamification.
+      </div>
+    </div>
+    <div class="badges">
+      <div class="badge">Unit 8 &amp; 9</div>
+      <div class="badge">Minimalistisches Layout</div>
+    </div>
+  </div>
 
-<div id="panel">
-  <div>Score: <span id="score">0</span></div>
-  <div>Lives: <span id="lives">3</span></div>
+  <div class="top-bar">
+    <div class="hearts">
+      <span id="hearts"></span>
+    </div>
+    <div>
+      <span class="chip">
+        🔢 Score: <strong id="score-display">0</strong>
+      </span>
+      <span class="chip">
+        📚 Wort: <strong id="current-index">0</strong>/<strong id="total-words">0</strong>
+      </span>
+      <span class="chip">
+        🔥 Streak: <strong id="streak">0</strong>
+      </span>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: Question / Modes -->
+    <div class="card">
+      <div class="card-header-line">
+        <div class="card-title">Lernbereich</div>
+        <div class="tag" id="mode-tag">Noch nicht gestartet</div>
+      </div>
+
+      <div class="question-main" id="question-word">
+        Starte eine Runde, um loszulegen.
+      </div>
+      <div class="question-sub" id="question-subline">
+        Wähle rechts Unit, Lernmodus und Richtung und klicke dann auf „Spiel starten“.
+      </div>
+
+      <!-- Mode 1: Multiple Choice -->
+      <div id="mode-mc" class="mode-panel">
+        <div class="options" id="options-mc">
+          <!-- Optionen via JS -->
+        </div>
+      </div>
+
+      <!-- Mode 2: Flashcards -->
+      <div id="mode-card" class="mode-panel">
+        <div class="flashcard-box">
+          <div class="flash-main" id="flash-main-text"></div>
+          <div class="flash-translation hidden" id="flash-translation">
+            <div style="font-size:0.8rem; color: var(--text-muted);">Lösung:</div>
+            <span class="content" id="flash-translation-content"></span>
+          </div>
+        </div>
+        <div class="flash-buttons">
+          <button class="btn-secondary" id="btn-flip">Lösung anzeigen</button>
+          <button class="btn-secondary" id="btn-knew" disabled>Ich wusste es ✅</button>
+          <button class="btn-secondary" id="btn-didnt" disabled>Unsicher / Falsch ❌</button>
+        </div>
+      </div>
+
+      <!-- Mode 3: Satzmodus -->
+      <div id="mode-sentence" class="mode-panel">
+        <div class="sentence-info">
+          Schreibe einen einfachen englischen Satz mit dem Wort. Du bewertest dich selbst.
+        </div>
+        <div class="sentence-word" id="sentence-word"></div>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:6px;" id="sentence-translation"></div>
+        <textarea id="sentence-input" placeholder="Beispiel: The piston moves up and down in the engine."></textarea>
+        <div class="sentence-buttons">
+          <button class="btn-secondary" id="btn-sentence-ok">Satz passt ✅</button>
+          <button class="btn-secondary" id="btn-sentence-bad">Unsicher / Überspringen ❌</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Settings & Stats -->
+    <div class="card">
+      <div class="card-header-line">
+        <div class="card-title">Einstellungen &amp; Auswertung</div>
+        <div class="tag" id="unit-label">Keine Auswahl</div>
+      </div>
+
+      <!-- Unit selection -->
+      <div class="settings-block">
+        <div class="settings-label">Unit wählen</div>
+        <div class="button-row">
+          <button class="btn-chip selected" data-unit="all">
+            <span class="dot"></span> Unit 8 &amp; 9
+          </button>
+          <button class="btn-chip" data-unit="8">
+            <span class="dot"></span> nur Unit 8
+          </button>
+          <button class="btn-chip" data-unit="9">
+            <span class="dot"></span> nur Unit 9
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode selection -->
+      <div class="settings-block">
+        <div class="settings-label">Lernmodus</div>
+        <div class="button-row">
+          <button class="btn-chip selected" data-mode="mc">
+            <span class="dot"></span> Multiple Choice
+          </button>
+          <button class="btn-chip" data-mode="card">
+            <span class="dot"></span> Karteikarten
+          </button>
+          <button class="btn-chip" data-mode="sentence">
+            <span class="dot"></span> Satzmodus
+          </button>
+        </div>
+      </div>
+
+      <!-- Direction selection -->
+      <div class="settings-block">
+        <div class="settings-label">Richtung</div>
+        <div class="button-row">
+          <button class="btn-chip selected" data-direction="en-de">
+            <span class="dot"></span> Englisch → Deutsch
+          </button>
+          <button class="btn-chip" data-direction="de-en">
+            <span class="dot"></span> Deutsch → Englisch
+          </button>
+          <button class="btn-chip" data-direction="mix">
+            <span class="dot"></span> Mix
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="start-btn">▶ Spiel starten</button>
+      <button class="btn-secondary" id="restart-btn" style="display:none;">🔁 Runde neu starten</button>
+
+      <div class="hint">
+        • Du hast <strong>3 Leben</strong>. Falsche Antworten kosten ein Herz.<br>
+        • Am Ende siehst du eine Liste deiner „Problemwörter“.
+      </div>
+
+      <div class="status-box" id="status-box">
+        Hier siehst du nach einer Runde deine Trefferquote, deinen Rang (Bronze / Silber / Gold) und die häufigsten Fehler.
+      </div>
+
+      <div class="summary" id="summary" style="display:none;">
+        <strong>Wörter zum Wiederholen:</strong>
+        <div class="summary-list" id="summary-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      🎧 Tipp: Sprich Wörter und Übersetzungen laut nach – wie bei Duolingo – für besseren Lerneffekt.
+    </div>
+    <div class="pill-small">Made for Technical English 2 – Unit 8 &amp; 9</div>
+  </div>
 </div>
 
-<div id="wordBox">Catch the item that matches: <b id="targetMeaning">---</b></div>
-<div id="choices"></div>
-
 <script>
-// Canvas setup
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const scoreEl = document.getElementById("score");
-const livesEl = document.getElementById("lives");
-const targetMeaningEl = document.getElementById("targetMeaning");
-const choicesDiv = document.getElementById("choices");
+  // -----------------------------
+  // Vocabulary data (aus deiner PDF-Liste) 
+  // -----------------------------
+  const vocabulary = [
+    // Unit 8 - Wave Power
+    { en: "piston", de: "Kolben", unit: "8", topic: "Wave Power" },
+    { en: "linear", de: "linear", unit: "8", topic: "Wave Power" },
+    { en: "oscillating", de: "schwingend", unit: "8", topic: "Wave Power" },
+    { en: "pendulum", de: "Pendel", unit: "8", topic: "Wave Power" },
+    { en: "reciprocating", de: "hin- und hergehend", unit: "8", topic: "Wave Power" },
+    { en: "rotary", de: "drehend", unit: "8", topic: "Wave Power" },
+    { en: "anti-clockwise", de: "gegen den Uhrzeigersinn", unit: "8", topic: "Wave Power" },
+    { en: "clockwise", de: "im Uhrzeigersinn", unit: "8", topic: "Wave Power" },
+    { en: "operation", de: "Funktionsweise", unit: "8", topic: "Wave Power" },
+    { en: "oscillate", de: "schwingen", unit: "8", topic: "Wave Power" },
+    { en: "reciprocate", de: "hin- und hergehen", unit: "8", topic: "Wave Power" },
+    { en: "benefit", de: "Nutzen", unit: "8", topic: "Wave Power" },
+    { en: "energy resource", de: "Energieressourcen", unit: "8", topic: "Wave Power" },
+    { en: "fossil fuel", de: "fossiler Brennstoff", unit: "8", topic: "Wave Power" },
+    { en: "buoy", de: "Boje", unit: "8", topic: "Wave Power" },
 
-let score = 0;
-let lives = 3;
-let basket = { x: 220, y: 550, width: 60, height: 30 };
-let fallingItems = [];
-let speed = 2;
-let currentTarget = null;
+    // Unit 8 - Engines
+    { en: "cam", de: "Nocken", unit: "8", topic: "Engines" },
+    { en: "crankshaft", de: "Kurbelwelle", unit: "8", topic: "Engines" },
+    { en: "cylinder", de: "Zylinder", unit: "8", topic: "Engines" },
+    { en: "exhaust", de: "Abgas", unit: "8", topic: "Engines" },
+    { en: "intake", de: "Einlass", unit: "8", topic: "Engines" },
+    { en: "internal-combustion engine", de: "Verbrennungsmaschine", unit: "8", topic: "Engines" },
+    { en: "port", de: "Anschluss", unit: "8", topic: "Engines" },
+    { en: "spark plug", de: "Zündkerze", unit: "8", topic: "Engines" },
+    { en: "valve", de: "Ventil", unit: "8", topic: "Engines" },
+    { en: "compress", de: "komprimieren", unit: "8", topic: "Engines" },
+    { en: "compression", de: "Kompression", unit: "8", topic: "Engines" },
+    { en: "expand", de: "ausdehnen", unit: "8", topic: "Engines" },
+    { en: "explosion", de: "Explosion", unit: "8", topic: "Engines" },
+    { en: "ignite", de: "zünden", unit: "8", topic: "Engines" },
+    { en: "ignition", de: "Zündung", unit: "8", topic: "Engines" },
+    { en: "inlet", de: "Einlass", unit: "8", topic: "Engines" },
+    { en: "simultaneously", de: "gleichzeitig", unit: "8", topic: "Engines" },
+    { en: "stroke", de: "Takt", unit: "8", topic: "Engines" },
+    { en: "top dead centre (TDC)", de: "oberer Totpunkt", unit: "8", topic: "Engines" },
+    { en: "torsion", de: "Torsion", unit: "8", topic: "Engines" },
+    { en: "force", de: "Kraft", unit: "8", topic: "Engines" },
+    { en: "high pressure", de: "hoher Druck", unit: "8", topic: "Engines" },
+    { en: "rapidly", de: "schnell", unit: "8", topic: "Engines" },
+    { en: "vacuum", de: "Unterdruck", unit: "8", topic: "Engines" },
+    { en: "hydrogen", de: "Wasserstoff", unit: "8", topic: "Engines" },
 
-// Vocabulary list
-const vocab = [
-  { word: "apple", meaning: "a fruit" },
-  { word: "dog", meaning: "an animal" },
-  { word: "car", meaning: "a vehicle" },
-  { word: "chair", meaning: "furniture" },
-  { word: "book", meaning: "something you read" },
-];
+    // Unit 8 - Cooling and Heating
+    { en: "absorb", de: "absorbieren", unit: "8", topic: "Cooling and Heating" },
+    { en: "condense", de: "kondensieren", unit: "8", topic: "Cooling and Heating" },
+    { en: "condenser", de: "Kondensator", unit: "8", topic: "Cooling and Heating" },
+    { en: "decompress", de: "entspannen", unit: "8", topic: "Cooling and Heating" },
+    { en: "displaced", de: "verdrängt", unit: "8", topic: "Cooling and Heating" },
+    { en: "evaporate", de: "verdampfen", unit: "8", topic: "Cooling and Heating" },
+    { en: "evaporator", de: "Verdampfer", unit: "8", topic: "Cooling and Heating" },
+    { en: "expansion", de: "Ausdehnung", unit: "8", topic: "Cooling and Heating" },
+    { en: "fluid", de: "Flüssigkeit", unit: "8", topic: "Cooling and Heating" },
+    { en: "principle", de: "Prinzip", unit: "8", topic: "Cooling and Heating" },
+    { en: "upthrust", de: "Auftrieb", unit: "8", topic: "Cooling and Heating" },
+    { en: "cycle", de: "Zyklus", unit: "8", topic: "Cooling and Heating" },
+    { en: "melt", de: "schmelzen", unit: "8", topic: "Cooling and Heating" },
+    { en: "refrigeration", de: "Kühlung", unit: "8", topic: "Cooling and Heating" },
+    { en: "solidify", de: "erstarren", unit: "8", topic: "Cooling and Heating" },
+    { en: "coil", de: "Spule, Rolle, Spirale", unit: "8", topic: "Cooling and Heating" },
+    { en: "compressor", de: "Kompressor", unit: "8", topic: "Cooling and Heating" },
+    { en: "extract", de: "entnehmen", unit: "8", topic: "Cooling and Heating" },
+    { en: "reaction", de: "Reaktion", unit: "8", topic: "Cooling and Heating" },
+    { en: "reduce", de: "verringern", unit: "8", topic: "Cooling and Heating" },
+    { en: "reverse", de: "umsteuern", unit: "8", topic: "Cooling and Heating" },
+    { en: "transfer", de: "übertragen", unit: "8", topic: "Cooling and Heating" },
+    { en: "operate", de: "in Betrieb sein", unit: "8", topic: "Cooling and Heating" },
+    { en: "refrigerant", de: "Kühlmittel", unit: "8", topic: "Cooling and Heating" },
+    { en: "geothermal", de: "geothermisch", unit: "8", topic: "Cooling and Heating" },
 
-function newRound() {
-  // pick target meaning
-  currentTarget = vocab[Math.floor(Math.random() * vocab.length)];
-  targetMeaningEl.textContent = currentTarget.meaning;
+    // Further basic vocabulary - Energy and Power (Unit 8)
+    { en: "wind power", de: "Windkraft/ Windenergie", unit: "8", topic: "Energy and Power" },
+    { en: "hydroelectricity", de: "Wasserkraftstrom", unit: "8", topic: "Energy and Power" },
+    { en: "solar energy", de: "Sonnenenergie", unit: "8", topic: "Energy and Power" },
+    { en: "bioenergy", de: "Bioenergie (Energie von Biomasse)", unit: "8", topic: "Energy and Power" },
+    { en: "nuclear energy", de: "Atomkraft", unit: "8", topic: "Energy and Power" },
+    { en: "fossil energy sources", de: "Fossile Energieträger", unit: "8", topic: "Energy and Power" },
+    { en: "geothermal energy", de: "Erdwärme", unit: "8", topic: "Energy and Power" },
+    { en: "coal", de: "Kohle", unit: "8", topic: "Energy and Power" },
+    { en: "atomic power plant", de: "Atomkraftwerk", unit: "8", topic: "Energy and Power" },
+    { en: "renewable", de: "erneuerbar", unit: "8", topic: "Energy and Power" },
+    { en: "energy consumption", de: "Energieverbrauch", unit: "8", topic: "Energy and Power" },
+    { en: "emissions", de: "Ausstoss", unit: "8", topic: "Energy and Power" },
+    { en: "energy policy", de: "Energiepolitik", unit: "8", topic: "Energy and Power" },
+    { en: "uranium", de: "Uran", unit: "8", topic: "Energy and Power" },
+    { en: "carbon-neutral", de: "CO2-neutral", unit: "8", topic: "Energy and Power" },
+    { en: "political party", de: "politische Partei", unit: "8", topic: "Energy and Power" },
+    { en: "oil extraction", de: "Erdölförderung", unit: "8", topic: "Energy and Power" },
+    { en: "to generate electricity", de: "Elektrizität erzeugen", unit: "8", topic: "Energy and Power" },
+    { en: "to pollute", de: "verschmutzen", unit: "8", topic: "Energy and Power" },
+    { en: "to threaten", de: "bedrohen", unit: "8", topic: "Energy and Power" },
+    { en: "to invest in something", de: "In etwas investieren", unit: "8", topic: "Energy and Power" },
 
-  // show 3 choice buttons
-  const shuffled = [...vocab].sort(() => Math.random() - 0.5).slice(0, 3);
-  if (!shuffled.includes(currentTarget)) shuffled[0] = currentTarget;
+    // Unit 9 - Sports Data
+    { en: "approximately", de: "annähernd", unit: "9", topic: "Sports Data" },
+    { en: "cyclist", de: "Radrennfahrer", unit: "9", topic: "Sports Data" },
+    { en: "almost", de: "fast", unit: "9", topic: "Sports Data" },
+    { en: "altimeter", de: "Höhenmesser", unit: "9", topic: "Sports Data" },
+    { en: "altitude", de: "Höhenlage", unit: "9", topic: "Sports Data" },
+    { en: "apply", de: "aufbringen/ anbringen", unit: "9", topic: "Sports Data" },
+    { en: "atmospheric", de: "Atmosphären-", unit: "9", topic: "Sports Data" },
+    { en: "barometer", de: "Barometer", unit: "9", topic: "Sports Data" },
+    { en: "blog", de: "Blog", unit: "9", topic: "Sports Data" },
+    { en: "chain", de: "Kette", unit: "9", topic: "Sports Data" },
+    { en: "compete", de: "antreten", unit: "9", topic: "Sports Data" },
+    { en: "data", de: "Daten", unit: "9", topic: "Sports Data" },
+    { en: "ensure", de: "darauf achten", unit: "9", topic: "Sports Data" },
+    { en: "lubricant", de: "Schmiermittel", unit: "9", topic: "Sports Data" },
+    { en: "odometer", de: "Kilometerzähler", unit: "9", topic: "Sports Data" },
+    { en: "quick release", de: "Schnellspann-", unit: "9", topic: "Sports Data" },
+    { en: "saddle", de: "Sattel", unit: "9", topic: "Sports Data" },
+    { en: "slip", de: "durchgleiten", unit: "9", topic: "Sports Data" },
+    { en: "tachometer", de: "Tachometer", unit: "9", topic: "Sports Data" },
+    { en: "wear", de: "Verschleiss", unit: "9", topic: "Sports Data" },
+    { en: "wheel rim", de: "Felge", unit: "9", topic: "Sports Data" },
+    { en: "wirelessly", de: "drahtlos", unit: "9", topic: "Sports Data" },
+    { en: "worn", de: "verschlissen", unit: "9", topic: "Sports Data" },
+    { en: "heartbeat", de: "Herzschlag", unit: "9", topic: "Sports Data" },
+    { en: "heart rate monitor", de: "Pulsfrequenzmesser", unit: "9", topic: "Sports Data" },
+    { en: "kilopascal", de: "Kilopascal", unit: "9", topic: "Sports Data" },
+    { en: "power output", de: "Leistungsabgabe", unit: "9", topic: "Sports Data" },
+    { en: "scales", de: "Waage", unit: "9", topic: "Sports Data" },
+    { en: "stopwatch", de: "Stoppuhr", unit: "9", topic: "Sports Data" },
+    { en: "just over", de: "knapp über", unit: "9", topic: "Sports Data" },
+    { en: "just under", de: "knapp unter", unit: "9", topic: "Sports Data" },
+    { en: "more than", de: "mehr als", unit: "9", topic: "Sports Data" },
+    { en: "nearly", de: "fast", unit: "9", topic: "Sports Data" },
+    { en: "filter", de: "Filter", unit: "9", topic: "Sports Data" },
+    { en: "lubricate", de: "schmieren", unit: "9", topic: "Sports Data" },
 
-  choicesDiv.innerHTML = "";
-  shuffled.sort(() => Math.random() - 0.5).forEach((entry) => {
-    const btn = document.createElement("button");
-    btn.className = "choiceBtn";
-    btn.textContent = entry.word;
-    btn.onclick = () => spawnItem(entry.word);
-    choicesDiv.appendChild(btn);
-  });
-}
+    // Unit 9 - Sensors
+    { en: "squeeze", de: "quetschen", unit: "9", topic: "Sensors" },
+    { en: "sensor", de: "Sensor", unit: "9", topic: "Sensors" },
+    { en: "convert", de: "umwandeln", unit: "9", topic: "Sensors" },
+    { en: "detect", de: "erfassen", unit: "9", topic: "Sensors" },
+    { en: "environment", de: "Umgebung", unit: "9", topic: "Sensors" },
+    { en: "accelerometer", de: "Beschleunigungsmesser", unit: "9", topic: "Sensors" },
+    { en: "bending", de: "Biege-", unit: "9", topic: "Sensors" },
+    { en: "chest", de: "Brust", unit: "9", topic: "Sensors" },
+    { en: "deflection", de: "Ausschlag", unit: "9", topic: "Sensors" },
+    { en: "dummy", de: "Dummy", unit: "9", topic: "Sensors" },
+    { en: "impact", de: "Aufprall", unit: "9", topic: "Sensors" },
+    { en: "in addition", de: "außerdem", unit: "9", topic: "Sensors" },
+    { en: "load", de: "Kraft", unit: "9", topic: "Sensors" },
+    { en: "rib", de: "Rippe", unit: "9", topic: "Sensors" },
+    { en: "shear", de: "Scherung", unit: "9", topic: "Sensors" },
+    { en: "tension", de: "Spannung", unit: "9", topic: "Sensors" },
+    { en: "torsion", de: "Torsion", unit: "9", topic: "Sensors" },
+    { en: "bass volume", de: "Basslautstärke", unit: "9", topic: "Sensors" },
+    { en: "dial", de: "Skala", unit: "9", topic: "Sensors" },
+    { en: "gauge", de: "Druckmesser", unit: "9", topic: "Sensors" },
+    { en: "deformation", de: "Verformung", unit: "9", topic: "Sensors" },
+    { en: "strain", de: "Dehnung", unit: "9", topic: "Sensors" },
 
-function spawnItem(word) {
-  fallingItems.push({ word, x: Math.random() * 450, y: -20 });
-}
+    // Unit 9 - Positioning
+    { en: "exactly", de: "genau", unit: "9", topic: "Positioning" },
+    { en: "for instance", de: "zum Beispiel", unit: "9", topic: "Positioning" },
+    { en: "Global Positioning System (GPS)", de: "Global Positioning System (GPS)", unit: "9", topic: "Positioning" },
+    { en: "in other words", de: "mit andern Worten", unit: "9", topic: "Positioning" },
+    { en: "latitude", de: "geografische Breite", unit: "9", topic: "Positioning" },
+    { en: "longitude", de: "geografische Länge", unit: "9", topic: "Positioning" },
+    { en: "multiply", de: "multiplizieren", unit: "9", topic: "Positioning" },
+    { en: "nautical mile", de: "Seemeile", unit: "9", topic: "Positioning" },
+    { en: "orbit", de: "Umlaufbahn", unit: "9", topic: "Positioning" },
+    { en: "precise", de: "genau", unit: "9", topic: "Positioning" },
+    { en: "satellite", de: "Satellit", unit: "9", topic: "Positioning" },
+    { en: "subtract", de: "subtrahieren", unit: "9", topic: "Positioning" },
+    { en: "such as", de: "wie etwa", unit: "9", topic: "Positioning" },
+    { en: "that is", de: "das heißt", unit: "9", topic: "Positioning" },
+    { en: "transmission", de: "Übertragung", unit: "9", topic: "Positioning" },
+    { en: "for example", de: "zum Beispiel", unit: "9", topic: "Positioning" },
+    { en: "sea level", de: "Meeresspiegel", unit: "9", topic: "Positioning" },
+    { en: "approach", de: "sich nähern", unit: "9", topic: "Positioning" },
+    { en: "burst", de: "Stoß", unit: "9", topic: "Positioning" },
+    { en: "lidar system", de: "Lidarsystem", unit: "9", topic: "Positioning" },
+    { en: "ping", de: "Ping", unit: "9", topic: "Positioning" },
+    { en: "pinger", de: "Pinger", unit: "9", topic: "Positioning" },
+    { en: "radar system", de: "Radarsystem", unit: "9", topic: "Positioning" },
+    { en: "reflect", de: "reflektieren", unit: "9", topic: "Positioning" }
+  ];
 
-function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // -----------------------------
+  // State & helpers
+  // -----------------------------
+  const heartsEl = document.getElementById("hearts");
+  const scoreDisplay = document.getElementById("score-display");
+  const currentIndexEl = document.getElementById("current-index");
+  const totalWordsEl = document.getElementById("total-words");
+  const streakEl = document.getElementById("streak");
+  const progressFill = document.getElementById("progress-fill");
+  const questionWordEl = document.getElementById("question-word");
+  const questionSublineEl = document.getElementById("question-subline");
+  const modeTagEl = document.getElementById("mode-tag");
+  const unitLabelEl = document.getElementById("unit-label");
+  const statusBox = document.getElementById("status-box");
+  const summaryEl = document.getElementById("summary");
+  const summaryListEl = document.getElementById("summary-list");
+  const startBtn = document.getElementById("start-btn");
+  const restartBtn = document.getElementById("restart-btn");
 
-  // Draw basket
-  ctx.fillStyle = "#333";
-  ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
+  const unitButtons = document.querySelectorAll("button[data-unit]");
+  const modeButtons = document.querySelectorAll("button[data-mode]");
+  const directionButtons = document.querySelectorAll("button[data-direction]");
 
-  // Update falling items
-  ctx.font = "20px Arial";
-  fallingItems.forEach((item, index) => {
-    item.y += speed;
+  // Mode elements
+  const modePanels = {
+    mc: document.getElementById("mode-mc"),
+    card: document.getElementById("mode-card"),
+    sentence: document.getElementById("mode-sentence")
+  };
+  const optionsMcEl = document.getElementById("options-mc");
 
-    // Draw word
-    ctx.fillStyle = "#000";
-    ctx.fillText(item.word, item.x, item.y);
+  const flashMainTextEl = document.getElementById("flash-main-text");
+  const flashTranslationEl = document.getElementById("flash-translation");
+  const flashTranslationContentEl = document.getElementById("flash-translation-content");
+  const btnFlip = document.getElementById("btn-flip");
+  const btnKnew = document.getElementById("btn-knew");
+  const btnDidnt = document.getElementById("btn-didnt");
 
-    // Check collision
-    if (
-      item.y + 20 > basket.y &&
-      item.x > basket.x - 20 &&
-      item.x < basket.x + basket.width + 20
-    ) {
-      if (item.word === currentTarget.word) {
-        score += 10;
-        scoreEl.textContent = score;
-        speed += 0.2;
-        newRound();
-      } else {
-        lives--;
-        livesEl.textContent = lives;
-        if (lives <= 0) alert("Game Over! Your score: " + score);
+  const sentenceWordEl = document.getElementById("sentence-word");
+  const sentenceTranslationEl = document.getElementById("sentence-translation");
+  const sentenceInputEl = document.getElementById("sentence-input");
+  const btnSentenceOk = document.getElementById("btn-sentence-ok");
+  const btnSentenceBad = document.getElementById("btn-sentence-bad");
+
+  let settings = {
+    unit: "all",
+    mode: "mc",
+    direction: "en-de"
+  };
+
+  let gameState = {
+    words: [],
+    index: 0,
+    score: 0,
+    streak: 0,
+    lives: 3,
+    answered: 0,
+    mistakes: {}, // { en: {count, item} }
+    currentItem: null,
+    currentDirection: "en-de"
+  };
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function chooseWrongOptions(pool, correctItem, direction, count) {
+    const side = direction === "de-en" ? "en" : "de";
+    const others = pool.filter(item => item !== correctItem);
+    const shuffled = shuffle(others);
+    const result = [];
+    const seen = new Set();
+    for (const item of shuffled) {
+      const val = item[side];
+      if (!seen.has(val)) {
+        seen.add(val);
+        result.push(item);
       }
-      fallingItems.splice(index, 1);
+      if (result.length >= count) break;
     }
+    return result.slice(0, count);
+  }
 
-    // Missed
-    if (item.y > 620) {
-      lives--;
-      livesEl.textContent = lives;
-      if (lives <= 0) alert("Game Over! Your score: " + score);
-      fallingItems.splice(index, 1);
-    }
+  function updateHearts() {
+    let hearts = "";
+    for (let i = 0; i < gameState.lives; i++) hearts += "❤️";
+    for (let i = gameState.lives; i < 3; i++) hearts += "🖤";
+    heartsEl.textContent = hearts;
+  }
+
+  function updateProgress() {
+    const total = gameState.words.length || 1;
+    const percentage = (gameState.index / total) * 100;
+    progressFill.style.width = percentage + "%";
+    currentIndexEl.textContent = gameState.index;
+    totalWordsEl.textContent = total;
+  }
+
+  function resetStatsUi() {
+    scoreDisplay.textContent = "0";
+    streakEl.textContent = "0";
+    summaryEl.style.display = "none";
+    summaryListEl.innerHTML = "";
+    statusBox.classList.remove("good", "bad");
+    statusBox.textContent = "Hier siehst du nach einer Runde deine Trefferquote, deinen Rang (Bronze / Silber / Gold) und die häufigsten Fehler.";
+  }
+
+  function setModePanel(mode) {
+    Object.keys(modePanels).forEach(key => {
+      modePanels[key].classList.toggle("active", key === mode);
+    });
+    const modeNames = {
+      mc: "Multiple Choice",
+      card: "Karteikarten",
+      sentence: "Satzmodus"
+    };
+    modeTagEl.textContent = modeNames[mode] || "";
+  }
+
+  // -----------------------------
+  // Settings handlers
+  // -----------------------------
+  unitButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      unitButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      settings.unit = btn.getAttribute("data-unit");
+
+      if (settings.unit === "all") unitLabelEl.textContent = "Unit 8 & 9 ausgewählt";
+      if (settings.unit === "8") unitLabelEl.textContent = "Nur Unit 8 ausgewählt";
+      if (settings.unit === "9") unitLabelEl.textContent = "Nur Unit 9 ausgewählt";
+    });
   });
 
-  requestAnimationFrame(update);
-}
+  modeButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      modeButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      settings.mode = btn.getAttribute("data-mode");
+      setModePanel(settings.mode);
+      if (gameState.words.length > 0) {
+        // Zeige aktuelle Vokabel im neuen Modus
+        renderQuestion(false);
+      }
+    });
+  });
 
-// Basket movement
-window.addEventListener("mousemove", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  basket.x = e.clientX - rect.left - basket.width / 2;
-});
+  directionButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      directionButtons.forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      settings.direction = btn.getAttribute("data-direction");
+    });
+  });
 
-newRound();
-update();
+  // -----------------------------
+  // Game start / reset
+  // -----------------------------
+  startBtn.addEventListener("click", () => startGame());
+  restartBtn.addEventListener("click", () => startGame());
+
+  function filterVocabulary() {
+    if (settings.unit === "8" || settings.unit === "9") {
+      return vocabulary.filter(v => v.unit === settings.unit);
+    }
+    return vocabulary.slice();
+  }
+
+  function startGame() {
+    gameState.words = shuffle(filterVocabulary());
+    gameState.index = 0;
+    gameState.score = 0;
+    gameState.streak = 0;
+    gameState.lives = 3;
+    gameState.answered = 0;
+    gameState.mistakes = {};
+    gameState.currentItem = null;
+    gameState.currentDirection = settings.direction;
+
+    updateHearts();
+    updateProgress();
+    resetStatsUi();
+    setModePanel(settings.mode);
+    restartBtn.style.display = "inline-block";
+
+    questionWordEl.textContent = "Los geht's!";
+    questionSublineEl.textContent = "Beantworte die Fragen oder schätze die Wörter – deine Runde ist gestartet.";
+
+    renderQuestion(true);
+  }
+
+  // -----------------------------
+  // Render question (all modes)
+  // -----------------------------
+  function renderQuestion(incrementIndex) {
+    if (incrementIndex && gameState.index < gameState.words.length) {
+      // nothing extra, index wird schon vorher erhöht
+    }
+
+    if (gameState.lives <= 0 || gameState.index >= gameState.words.length) {
+      endGame();
+      return;
+    }
+
+    const item = gameState.words[gameState.index];
+
+    let direction = settings.direction;
+    if (direction === "mix") {
+      direction = Math.random() < 0.5 ? "en-de" : "de-en";
+    }
+    gameState.currentItem = item;
+    gameState.currentDirection = direction;
+
+    const isEnToDe = direction === "en-de";
+    const question = isEnToDe ? item.en : item.de;
+    const answer = isEnToDe ? item.de : item.en;
+
+    questionWordEl.textContent = question;
+    questionSublineEl.textContent = isEnToDe
+      ? "Wie lautet die passende Übersetzung?"
+      : "Wie lautet das passende Wort auf Englisch?";
+
+    // Mode specific rendering
+    if (settings.mode === "mc") {
+      renderMc(item, direction);
+    } else if (settings.mode === "card") {
+      renderCard(question, answer);
+    } else if (settings.mode === "sentence") {
+      renderSentence(item);
+    }
+  }
+
+  // -----------------------------
+  // Mode 1: Multiple Choice
+  // -----------------------------
+  function renderMc(item, direction) {
+    optionsMcEl.innerHTML = "";
+    const isEnToDe = direction === "en-de";
+    const correctAnswer = isEnToDe ? item.de : item.en;
+    const wrong = chooseWrongOptions(gameState.words, item, direction, 3);
+    const side = isEnToDe ? "de" : "en";
+
+    const options = shuffle(
+      [{ text: correctAnswer, correct: true }]
+        .concat(wrong.map(w => ({ text: w[side], correct: false })))
+    );
+
+    const labels = ["A", "B", "C", "D"];
+    options.forEach((opt, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "option";
+      btn.dataset.correct = opt.correct ? "1" : "0";
+      btn.innerHTML = `
+        <span class="label">${labels[idx]}</span>
+        <span class="text">${opt.text}</span>
+      `;
+      btn.addEventListener("click", () => handleMcAnswer(btn, item));
+      optionsMcEl.appendChild(btn);
+    });
+  }
+
+  function handleMcAnswer(selectedBtn, item) {
+    const correct = selectedBtn.dataset.correct === "1";
+    const allButtons = optionsMcEl.querySelectorAll(".option");
+
+    allButtons.forEach(btn => {
+      btn.classList.add("disabled");
+      if (btn.dataset.correct === "1") {
+        btn.classList.add("correct");
+      }
+    });
+
+    if (!correct) {
+      selectedBtn.classList.add("wrong");
+      gameState.lives -= 1;
+      updateHearts();
+      gameState.streak = 0;
+
+      if (!gameState.mistakes[item.en]) {
+        gameState.mistakes[item.en] = { count: 0, item };
+      }
+      gameState.mistakes[item.en].count += 1;
+    } else {
+      let reward = 10;
+      if (gameState.streak >= 3) reward += 4;
+      gameState.score += reward;
+      gameState.streak += 1;
+    }
+
+    gameState.answered += 1;
+    scoreDisplay.textContent = gameState.score.toString();
+    streakEl.textContent = gameState.streak.toString();
+
+    gameState.index += 1;
+    updateProgress();
+
+    setTimeout(() => {
+      renderQuestion(true);
+    }, 600);
+  }
+
+  // -----------------------------
+  // Mode 2: Flashcards
+  // -----------------------------
+  function renderCard(question, answer) {
+    flashMainTextEl.textContent = question;
+    flashTranslationContentEl.textContent = answer;
+
+    flashTranslationEl.classList.add("hidden");
+    btnKnew.disabled = true;
+    btnDidnt.disabled = true;
+  }
+
+  btnFlip.addEventListener("click", () => {
+    if (!gameState.currentItem) return;
+    flashTranslationEl.classList.remove("hidden");
+    btnKnew.disabled = false;
+    btnDidnt.disabled = false;
+  });
+
+  btnKnew.addEventListener("click", () => {
+    if (!gameState.currentItem) return;
+    // Selbstbewertung: korrekt
+    gameState.score += 8;
+    gameState.streak += 1;
+    gameState.answered += 1;
+
+    scoreDisplay.textContent = gameState.score.toString();
+    streakEl.textContent = gameState.streak.toString();
+
+    gameState.index += 1;
+    updateProgress();
+    renderQuestion(true);
+  });
+
+  btnDidnt.addEventListener("click", () => {
+    if (!gameState.currentItem) return;
+    // Selbstbewertung: falsch / unsicher
+    gameState.lives -= 1;
+    updateHearts();
+    gameState.streak = 0;
+    gameState.answered += 1;
+
+    const item = gameState.currentItem;
+    if (!gameState.mistakes[item.en]) {
+      gameState.mistakes[item.en] = { count: 0, item };
+    }
+    gameState.mistakes[item.en].count += 1;
+
+    scoreDisplay.textContent = gameState.score.toString();
+    streakEl.textContent = gameState.streak.toString();
+
+    gameState.index += 1;
+    updateProgress();
+    renderQuestion(true);
+  });
+
+  // -----------------------------
+  // Mode 3: Satzmodus
+  // -----------------------------
+  function renderSentence(item) {
+    const isEnToDe = gameState.currentDirection === "en-de";
+    const mainWord = item.en; // Im Satzmodus verwenden wir immer das englische Wort
+    sentenceWordEl.textContent = mainWord;
+    sentenceTranslationEl.textContent = `Deutsch: ${item.de}`;
+    sentenceInputEl.value = "";
+  }
+
+  btnSentenceOk.addEventListener("click", () => {
+    if (!gameState.currentItem) return;
+    // Selbstbewertung: Satz gelungen
+    gameState.score += 8;
+    gameState.streak += 1;
+    gameState.answered += 1;
+
+    scoreDisplay.textContent = gameState.score.toString();
+    streakEl.textContent = gameState.streak.toString();
+
+    gameState.index += 1;
+    updateProgress();
+    renderQuestion(true);
+  });
+
+  btnSentenceBad.addEventListener("click", () => {
+    if (!gameState.currentItem) return;
+    // Selbstbewertung: unsicher
+    gameState.lives -= 1;
+    updateHearts();
+    gameState.streak = 0;
+    gameState.answered += 1;
+
+    const item = gameState.currentItem;
+    if (!gameState.mistakes[item.en]) {
+      gameState.mistakes[item.en] = { count: 0, item };
+    }
+    gameState.mistakes[item.en].count += 1;
+
+    scoreDisplay.textContent = gameState.score.toString();
+    streakEl.textContent = gameState.streak.toString();
+
+    gameState.index += 1;
+    updateProgress();
+    renderQuestion(true);
+  });
+
+  // -----------------------------
+  // End of game & statistics
+  // -----------------------------
+  function endGame() {
+    const total = gameState.words.length || 1;
+    const totalMistakesWords = Object.keys(gameState.mistakes).length;
+    const correctAnswers = Math.max(0, gameState.answered - totalMistakesWords);
+    const accuracy = Math.round((correctAnswers / total) * 100);
+
+    let rank = "Bronze";
+    if (accuracy >= 80) rank = "Gold";
+    else if (accuracy >= 60) rank = "Silber";
+
+    questionWordEl.textContent = gameState.lives <= 0
+      ? "Runde beendet – alle Leben sind aufgebraucht."
+      : "Gut gemacht – du hast die Runde abgeschlossen!";
+    questionSublineEl.textContent = "Schau dir deine Auswertung rechts an und starte bei Bedarf eine neue Runde.";
+
+    statusBox.classList.remove("good", "bad");
+    if (accuracy >= 75) {
+      statusBox.classList.add("good");
+    } else {
+      statusBox.classList.add("bad");
+    }
+    statusBox.innerHTML = `
+      Trefferquote: <strong>${accuracy}%</strong><br>
+      Score: <strong>${gameState.score}</strong><br>
+      Rang: <strong>${rank}</strong> (Bronze / Silber / Gold)
+    `;
+
+    const mistakesArray = Object.values(gameState.mistakes).sort((a, b) => b.count - a.count);
+    if (mistakesArray.length > 0) {
+      summaryEl.style.display = "block";
+      summaryListEl.innerHTML = "";
+      mistakesArray.forEach(({ item, count }) => {
+        const row = document.createElement("div");
+        row.className = "summary-item";
+        row.innerHTML = `
+          <span>${item.en} – <span style="color:var(--text-muted);">${item.de}</span></span>
+          <span class="miss-count">Fehler: ${count}</span>
+        `;
+        summaryListEl.appendChild(row);
+      });
+    } else {
+      summaryEl.style.display = "block";
+      summaryListEl.innerHTML = `
+        <div class="summary-item">
+          <span>Keine Fehler – starke Runde! 🎉</span>
+        </div>
+      `;
+    }
+  }
+
+  // Initial UI
+  updateHearts();
+  updateProgress();
+  setModePanel(settings.mode);
 </script>
 </body>
 </html>
-
